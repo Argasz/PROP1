@@ -1,15 +1,16 @@
 myObject = {
     create : function(prototypeList){
         var protoList = prototypeList;
-        if(!protoList){
+        if(!protoList) {
             protoList = [];
         }
-        return {protoList : protoList,
-            call : this.call,
-            create : this.create,
-            addPrototype : this.addPrototype,
-            hasProto : this.hasProto,
-            _superCall : this._superCall}
+
+        var ret = {};
+        for (var key in this){
+            ret[key] = this[key];
+        }
+        ret.protoList = protoList;
+        return ret;
     },
     call : function(funcName, parameters){
         if(this.hasOwnProperty(funcName)){
@@ -20,24 +21,25 @@ myObject = {
             }
         }else{
             for (i = 0; i < this.protoList.length; i++) {
-                var returnVal = this.protoList[i]._superCall(funcName, parameters);
+                var returnVal = this.protoList[i]._superCall(funcName);
                 if (returnVal) {
-                    return returnVal;
+                    returnVal = returnVal.bind(this);
+                    if(parameters === undefined || parameters.length === 0){
+                        return returnVal();
+                    }else{
+                        return returnVal.apply(null, parameters);
+                    }
                 }
             }
             throw this.constructor.name + " has no property " + funcName + ".";
         }
     },
-    _superCall : function(funcName, parameters){
+    _superCall : function(funcName){
         if(this.hasOwnProperty(funcName)){
-            if(parameters === undefined || parameters.length === 0){
-                return this[funcName]();
-            }else{
-                return this[funcName].apply(null, parameters);
-            }
+            return this[funcName];
         }else{
             for (i = 0; i < this.protoList.length; i++) {
-                var returnVal = this.protoList[i]._superCall(funcName, parameters);
+                var returnVal = this.protoList[i]._superCall(funcName);
                 if (returnVal) {
                     return returnVal;
                 }
@@ -70,5 +72,14 @@ myObject = {
     }
 
 };
+
+var obj0 = myObject.create(null);
+obj0.func = function(arg) { return "func0: " + arg; };
+var obj1 = myObject.create([obj0]);
+var obj2 = myObject.create([]);
+obj2.func = function(arg) { return "func2: " + arg; };
+var obj3 = myObject.create([obj1, obj2]);
+var result = obj3.call("func", ["hello"])  ;
+console.log("should print ’func0: hello’ ->", result);
 
 
