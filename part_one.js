@@ -1,12 +1,12 @@
 myObject = {
     create : function(prototypeList){
-        var protoList = prototypeList;
+        let protoList = prototypeList;
         if(!protoList) {
             protoList = [];
         }
 
-        var ret = {};
-        for (var key in this){
+        let ret = {};
+        for (let key in this){
             ret[key] = this[key];
         }
         ret.protoList = protoList;
@@ -21,7 +21,7 @@ myObject = {
             }
         }else{
             for (i = 0; i < this.protoList.length; i++) {
-                var returnVal = this.protoList[i]._superCall(funcName);
+                let returnVal = this.protoList[i]._superCall(funcName);
                 if (returnVal) {
                     returnVal = returnVal.bind(this);
                     if(parameters === undefined || parameters.length === 0){
@@ -38,8 +38,8 @@ myObject = {
         if(this.hasOwnProperty(funcName)){
             return this[funcName];
         }else{
-            for (i = 0; i < this.protoList.length; i++) {
-                var returnVal = this.protoList[i]._superCall(funcName);
+            for (let i = 0; i < this.protoList.length; i++) {
+                let returnVal = this.protoList[i]._superCall(funcName);
                 if (returnVal) {
                     return returnVal;
                 }
@@ -50,11 +50,8 @@ myObject = {
     addPrototype : function(proto){
         if(proto.hasProto(this)){
             throw "Circular inheritance."
-        }
-        if(typeof proto === "object"){
+        }else {
             this.protoList.push(proto);
-        }else{
-            throw "Prototype must be of type object."
         }
     },
     hasProto : function(obj){
@@ -62,7 +59,7 @@ myObject = {
             return true;
         }else{
             for(i = 0; i < this.protoList.length; i++){
-                var hasProto = this.protoList[i].hasProto(obj);
+                let hasProto = this.protoList[i].hasProto(obj);
                 if(hasProto){
                     return true;
                 }
@@ -70,7 +67,6 @@ myObject = {
             return false;
         }
     }
-
 };
 
 var obj0 = myObject.create(null);

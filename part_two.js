@@ -18,8 +18,12 @@ createClass = function(className, superClassList){
         new : function(){
             instance = {
                 call : function(funcName, parameters){
+                    if(this.hasOwnProperty(funcName)){
+                        return this[funcName].apply(null, parameters);
+                    } // ??
                     if(this.Class.hasOwnProperty(funcName)){
-                        return this.Class[funcName].apply(null, parameters);
+                        let ret = this.Class[funcName].bind(this);
+                        return ret.apply(null, parameters);
                     }else{
                         for(let c in this.Class.superClassList){
                             let returnVal = this.Class.superClassList[c].getFunction(funcName);
@@ -34,18 +38,32 @@ createClass = function(className, superClassList){
             };
             instance.Class = this;
             return instance;
+        },
+        hasSuper : function(superclass) {
+            if (this.superClassList.includes(superclass)) {
+                return true
+            } else {
+                for (let i = 0; i < this.superClassList.length; i++) {
+                    let hasProto = this.superClassList[i].hasSuper(superclass);
+                    if (hasProto) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        },
+        addSuperClass : function(superclass){
+            if(superclass.hasSuper(this)){
+                throw "Circular inheritance."
+            }else{
+                this.superClassList.push(superclass);
+            }
         }
     };
 
     return theClass;
 };
 
-class0 = createClass("Class0", null);
-class0.name = "A";
-class0.func = function(arg) { return "func0: " + arg + this.name; };
-class1 = createClass("Class1", [class0]);
-class2 = createClass("Class2", []);
-class3 = createClass("Class3", [class2, class1]);
-obj3 = class3.new();
-result = obj3.call("func", ["hello"]);
-console.log(result);
+var class0 = createClass("Class 0", null);
+var class1 = createClass("Class 1", [class0]);
+class0.addSuperClass(class1);
