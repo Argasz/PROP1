@@ -1,3 +1,9 @@
+/*
+ *  Aron Gassilewski | arga1535@student.su.se
+ *   Emanuel Fuetsch  | emfu2071@student.su.se
+ *
+ */
+
 createClass = function(className, superClassList){
     theClass = {
         className : className,
@@ -64,6 +70,3 @@ createClass = function(className, superClassList){
     return theClass;
 };
 
-var class0 = createClass("Class 0", null);
-var class1 = createClass("Class 1", [class0]);
-class0.addSuperClass(class1);
