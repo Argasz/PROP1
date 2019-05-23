@@ -1,15 +1,22 @@
+/*
+ *  Aron Gassilewski | arga1535@student.su.se
+ *   Emanuel Fuetsch  | emfu2071@student.su.se
+ *
+ */
+
 myObject = {
     create : function(prototypeList){
-        var protoList = prototypeList;
-        if(!protoList){
+        let protoList = prototypeList;
+        if(!protoList) {
             protoList = [];
         }
-        return {protoList : protoList,
-            call : this.call,
-            create : this.create,
-            addPrototype : this.addPrototype,
-            hasProto : this.hasProto,
-            _superCall : this._superCall}
+
+        let ret = {};
+        for (let key in this){
+            ret[key] = this[key];
+        }
+        ret.protoList = protoList;
+        return ret;
     },
     call : function(funcName, parameters){
         if(this.hasOwnProperty(funcName)){
@@ -20,24 +27,25 @@ myObject = {
             }
         }else{
             for (i = 0; i < this.protoList.length; i++) {
-                var returnVal = this.protoList[i]._superCall(funcName, parameters);
+                let returnVal = this.protoList[i]._superCall(funcName);
                 if (returnVal) {
-                    return returnVal;
+                    returnVal = returnVal.bind(this);
+                    if(parameters === undefined || parameters.length === 0){
+                        return returnVal();
+                    }else{
+                        return returnVal.apply(null, parameters);
+                    }
                 }
             }
             throw this.constructor.name + " has no property " + funcName + ".";
         }
     },
-    _superCall : function(funcName, parameters){
+    _superCall : function(funcName){
         if(this.hasOwnProperty(funcName)){
-            if(parameters === undefined || parameters.length === 0){
-                return this[funcName]();
-            }else{
-                return this[funcName].apply(null, parameters);
-            }
+            return this[funcName];
         }else{
-            for (i = 0; i < this.protoList.length; i++) {
-                var returnVal = this.protoList[i]._superCall(funcName, parameters);
+            for (let i = 0; i < this.protoList.length; i++) {
+                let returnVal = this.protoList[i]._superCall(funcName);
                 if (returnVal) {
                     return returnVal;
                 }
@@ -48,11 +56,8 @@ myObject = {
     addPrototype : function(proto){
         if(proto.hasProto(this)){
             throw "Circular inheritance."
-        }
-        if(typeof proto === "object"){
+        }else {
             this.protoList.push(proto);
-        }else{
-            throw "Prototype must be of type object."
         }
     },
     hasProto : function(obj){
@@ -60,7 +65,7 @@ myObject = {
             return true;
         }else{
             for(i = 0; i < this.protoList.length; i++){
-                var hasProto = this.protoList[i].hasProto(obj);
+                let hasProto = this.protoList[i].hasProto(obj);
                 if(hasProto){
                     return true;
                 }
@@ -68,7 +73,5 @@ myObject = {
             return false;
         }
     }
-
 };
-
 
